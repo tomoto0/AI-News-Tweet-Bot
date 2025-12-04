@@ -36,6 +36,11 @@ def create_manus_task(prompt: str) -> str:
         response.raise_for_status()
         task_data = response.json()
         task_id = task_data.get("id")
+        # ユーザーのエラーログから、タスク作成が失敗した場合でも 'task_id' が返されることが確認されたため、
+        # 'id' がない場合は 'task_id' を使用する。
+        if not task_id and "task_id" in task_data:
+            task_id = task_data["task_id"]
+        
         if not task_id:
             raise Exception(f"タスクIDが取得できませんでした: {task_data}")
         print(f"タスク作成成功。タスクID: {task_id}")
@@ -201,7 +206,7 @@ def post_tweet(tweet_text: str):
     
     # OAuth1Sessionを使って認証
     twitter = OAuth1Session(
-        TWITTER_CONSUMER_KEY,
+        client_key=TWITTER_CONSUMER_KEY,
         client_secret=TWITTER_CONSUMER_SECRET,
         resource_owner_key=TWITTER_ACCESS_TOKEN,
         resource_owner_secret=TWITTER_ACCESS_TOKEN_SECRET
